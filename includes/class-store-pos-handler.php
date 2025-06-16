@@ -128,20 +128,33 @@ class Store_POS_Handler {
     }
 
     public function get_shipping_methods() {
-        $shipping_methods = [];
+    $zones = WC_Shipping_Zones::get_zones();
+    $available_methods = [];
 
-        foreach (WC_Shipping_Zones::get_zones() as $zone) {
-            foreach ($zone['shipping_methods'] as $method) {
-                $shipping_methods[] = [
-                    'id'    => $method->id,
-                    'label' => $method->get_method_title(),
-                    'cost'  => $method->cost ?? 0,
+    foreach ($zones as $zone) {
+        foreach ($zone['shipping_methods'] as $method) {
+            if ($method->enabled === 'yes') {
+                $available_methods[] = [
+                    'title' => $method->get_title(),
+                    'cost'  => isset($method->cost) ? $method->cost : 0
                 ];
             }
         }
-
-        wp_send_json_success($shipping_methods);
     }
+
+    // Also include methods from the "Rest of the World" zone
+    $default_zone = new WC_Shipping_Zone(0);
+    foreach ($default_zone->get_shipping_methods() as $method) {
+        if ($method->enabled === 'yes') {
+            $available_methods[] = [
+                'title' => $method->get_title(),
+                'cost'  => isset($method->cost) ? $method->cost : 0
+            ];
+        }
+    }
+
+    wp_send_json_success($available_methods);
+}
                        
     
 }

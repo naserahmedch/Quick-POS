@@ -34,7 +34,9 @@
                         </tr>
                     </thead>
                     <tbody id="cart-items">
-                        <tr><td colspan="3" class="cart-empty">Empty Cart</td></tr>
+                        <tr>
+                            <td colspan="3" class="cart-empty">Empty Cart</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -56,7 +58,10 @@
     <!-- Discount Modal -->
     <div id="discount-modal" class="modal" style="display: none;">
         <div class="modal-content discount-modal-content">
-            <span class="close-modal" id="close-discount-modal">&times;</span>
+            <div class="modal-header">
+                <h3>Apply Discount</h3>
+                <span class="close-modal" id="close-discount-modal">&times;</span>
+            </div>
             <div class="discount-display">
                 <input type="text" id="discount-input" readonly placeholder="0" />
             </div>
@@ -83,22 +88,51 @@
 
     <!-- Note Modal -->
     <div id="note-modal" class="modal" style="display:none;">
-        <div class="modal-content" style="width: 300px;">
-            <span class="close-modal" id="close-note-modal">&times;</span>
-            <h4>Add Note</h4>
-            <textarea id="note-textarea" placeholder="Write your note..." style="width:100%; height: 100px; padding: 10px; margin-bottom: 10px;"></textarea>
-            <button id="submit-note" class="pay-btn" style="width:100%;">Add Note</button>
+        <div class="modal-content note-modal-content">
+
+            <div class="modal-header">
+                <h3>Add Note</h3>
+                <span class="close-modal" id="close-note-modal">&times;</span>
+            </div>
+
+            <div class="note-modal-body">
+                <textarea id="note-textarea" placeholder="Write your note..."></textarea>
+
+                <div class="note-actions">
+                    <button id="submit-note" class="add-note-btn">Add Note</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- Shipping Modal -->
     <div id="shipping-modal" class="modal" style="display:none;">
         <div class="modal-content shipping-modal-content">
-            <span class="close-modal" id="close-shipping-modal">&times;</span>
-            <h3>Select Shipping Method</h3>
-            <select id="shipping-methods-dropdown" style="width:100%;padding:10px;margin-bottom:10px;"></select>
-            <input type="number" id="custom-shipping-fee" placeholder="Or enter custom fee" style="width:100%;padding:10px;" />
-            <button id="apply-shipping-fee" class="pay-btn" style="margin-top:10px;">Apply Shipping</button>
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3>Select Shipping Method</h3>
+                <span class="close-modal" id="close-shipping-modal">&times;</span>
+            </div>
+
+            <div class="shipping-modal-body">
+                <!-- Label + Dropdown -->
+                <p class="modal-label">Available Shipping Methods:</p>
+                <select id="shipping-methods-dropdown">
+                    <option value="">Select a method</option>
+                </select>
+
+                <!-- Label + Custom Input -->
+                <p class="modal-label">Or Enter Custom Shipping Fee (Tk):</p>
+                <input type="number" id="custom-shipping-fee" placeholder="e.g. 50" />
+
+                <!-- Apply Button -->
+                <div class="shipping-actions">
+                    <button id="apply-shipping-fee">Apply</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -127,7 +161,9 @@
 
 <!-- Custom Confirmation Modal -->
 <div class="custom-confirmation-modal" style="display:none;">
-    <div class="modal-content"><p></p><button class="close-modal">Close</button></div>
+    <div class="modal-content">
+        <p></p><button class="close-modal">Close</button>
+    </div>
 </div>
 
 <!-- Order Summary Modal -->

@@ -60,35 +60,50 @@ jQuery(document).ready(function ($) {
         const $footer = $('#cart-footer-items');
         $footer.empty();
 
+        // 🧮 Subtotal
+        let subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        $footer.append(`
+        <div class="footer-subtotal">
+            <span>Subtotal</span>
+            <span>৳ ${subtotal.toFixed(2)}</span>
+        </div>
+    `);
+
+        // 🧾 Discount
         if (discountItem) {
             $footer.append(`
-                <div class="footer-item" data-type="discount">
-                    <strong>Discount</strong>: ৳ ${discountItem.value}
-                    <button class="edit-line">✎</button>
-                    <button class="remove-line">×</button>
-                </div>
-            `);
+            <div class="footer-item" data-type="discount">
+                <span class="footer-label">Discount</span>
+                <span class="footer-value">৳ ${discountItem.value}</span>
+                <button class="edit-line">✎</button>
+                <button class="remove-line">×</button>
+            </div>
+        `);
         }
 
+        // Shipping Fee
         if (shippingItem) {
             $footer.append(`
-                <div class="footer-item" data-type="shipping">
-                    <strong>Shipping Fee</strong>: ৳ ${shippingItem.value}
-                    <button class="edit-line">✎</button>
-                    <button class="remove-line">×</button>
-                </div>
-            `);
+        <div class="footer-item" data-type="shipping">
+            <span class="footer-label">Shipping Fee</span>
+            <span class="footer-value">৳ ${shippingItem.value}</span>
+            <button class="edit-line">✎</button>
+            <button class="remove-line">×</button>
+        </div>
+    `);
         }
 
+        // Note
         if (noteItem) {
             $footer.append(`
-                <div class="footer-item" data-type="note">
-                    <em>${noteItem.text}</em>
-                    <button class="edit-line">✎</button>
-                    <button class="remove-line">×</button>
-                </div>
-            `);
-        }        
+        <div class="footer-item" data-type="note">
+            <span class="footer-label">Note:</span>
+            <em class="footer-value">${noteItem.text}</em>
+            <button class="edit-line">✎</button>
+            <button class="remove-line">×</button>
+        </div>
+    `);
+        }
     }
 
     $(document).on('dblclick', '.footer-item', function () {
@@ -231,13 +246,13 @@ jQuery(document).ready(function ($) {
         // You can store selectedCustomerId for later use
         selectedCustomerId = data.id;
     });
-    
+
     // Handle clear
     $('#customer-search').on('select2:clear', function () {
         selectedCustomerId = null;
     });
-        
-    
+
+
 
     // Handle opening of the Add Customer modal
     $('#add-customer-btn').on('click', function () {
@@ -252,9 +267,9 @@ jQuery(document).ready(function ($) {
     // Add Customer Form Submit
     $('#addCustomerForm').off('submit').on('submit', function (e) {
         e.preventDefault();
-    
+
         const formData = $(this).serialize();
-    
+
         $.ajax({
             url: store_pos.ajax_url,
             type: 'POST',
@@ -266,14 +281,14 @@ jQuery(document).ready(function ($) {
                 if (response.success) {
                     // ✅ Close the modal (use .removeClass instead of .hide)
                     $('.store-pos-modal#add-customer').removeClass('active');
-    
+
                     // ✅ Show confirmation modal
                     showCustomModal('Customer added!', true);
-    
+
                     // ✅ Insert new customer into Select2 and select
                     const newOption = new Option(response.data.text, response.data.id, true, true);
                     $('#customer-search').append(newOption).trigger('change');
-    
+
                     // ✅ Optionally reset form
                     $('#addCustomerForm')[0].reset();
                 } else {
@@ -284,8 +299,8 @@ jQuery(document).ready(function ($) {
                 showCustomModal('Something went wrong.', false);
             }
         });
-    });    
-    
+    });
+
 
     $(document).on('click', '.add-to-cart-btn', function () {
         const id = $(this).data('id');
@@ -365,7 +380,8 @@ jQuery(document).ready(function ($) {
                 $dropdown.empty();
                 $dropdown.append('<option value="">Select a method</option>');
                 response.data.forEach(method => {
-                    $dropdown.append(`<option value="${method.cost}">${method.title} - ৳ ${method.cost}</option>`);
+                    const title = method.title || "Unnamed";
+                    $dropdown.append(`<option value="${method.cost}">${title} - ৳ ${method.cost}</option>`);
                 });
                 $('#shipping-modal').show();
             } else {
@@ -410,7 +426,7 @@ jQuery(document).ready(function ($) {
     function showCustomModal(message, isSuccess = true) {
         // Remove any existing modal first
         $('.custom-confirmation-modal-overlay').remove();
-    
+
         // Create the new modal
         const modal = $(`
             <div class="custom-confirmation-modal-overlay">
@@ -425,12 +441,12 @@ jQuery(document).ready(function ($) {
                 </div>
             </div>
         `);
-    
+
         $('body').append(modal);
-    
+
         // Close on button click
         modal.find('.modal-close-btn').on('click', function () {
             modal.remove();
         });
-    }        
+    }
 });
