@@ -56,6 +56,83 @@ jQuery(document).ready(function ($) {
         renderCartFooterItems();
     }
 
+    // Swithch to Order Summary Panel
+    $(document).on('click', '.pay-btn', function () {
+        if (cart.length === 0) {
+            alert("Cart is empty!");
+            return;
+        }
+
+        $('#cart-panel').hide(); // Hide cart view
+
+        const $summary = $('#order-summary-panel');
+        $summary.empty();
+
+        const selectedCustomer = $('#customer-search').select2('data')[0] || {};
+        const customerName = selectedCustomer.text || 'Guest';
+        const customerPhone = selectedCustomer.phone || '—';
+        const customerAddress = selectedCustomer.address || '—';
+
+        let subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        let total = subtotal - (discountItem?.value || 0) + (shippingItem?.value || 0);
+
+        let summaryHTML = `
+        <div class="order-summary-box" style="padding: 20px;">
+            <div class="summary-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div>
+                    <div><strong>Customer:</strong> ${customerName}</div>
+                    <div><strong>Phone:</strong> ${customerPhone}</div>
+                    <div><strong>Address:</strong> ${customerAddress}</div>
+                    ${noteItem ? `<div class="note">Note: ${noteItem.text}</div>` : ''}
+                </div>
+                <div style="text-align:right;"><strong>Order Summary</strong></div>
+            </div>
+
+            <div class="summary-body" style="border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 15px 0;">
+                ${cart.map(item => `
+            <div class="summary-item">
+                <div class="summary-item-left">
+                <img src="${item.image}" alt="${item.name}" />
+                <div>
+                    <div class="item-name">${item.name}</div>
+                    <small>Qty: ${item.quantity}</small>
+                </div>
+                </div>
+                <div class="summary-item-price">${(item.quantity * item.price).toFixed(2)} Tk</div>
+            </div>
+            `).join('')}
+            </div>
+
+            <div class="summary-totals" style="margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between;"><span>Subtotal</span><span>${subtotal.toFixed(2)} Tk</span></div>
+                ${discountItem ? `<div style="display: flex; justify-content: space-between;"><span>Discount</span><span>- ${discountItem.value} Tk</span></div>` : ''}
+                ${shippingItem ? `<div style="display: flex; justify-content: space-between;"><span>Shipping</span><span>${shippingItem.value} Tk</span></div>` : ''}
+                <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-top: 10px;"><span>Total</span><span>৳ ${total.toFixed(2)}</span></div>
+            </div>
+
+            <div class="summary-actions" style="margin-top: 25px; display: flex; justify-content: space-between;">
+                <a href="#" id="back-to-cart" class="go-back">← Back to Cart</a>
+                <button id="place-order" class="btn green">Place Order ৳ ${total.toFixed(2)}</button>
+            </div>
+        </div>
+    `;
+
+        $summary.html(summaryHTML).show();
+    });
+
+    // Back to Order Cart Panel
+    $(document).on('click', '#back-to-cart', function (e) {
+        e.preventDefault();
+        $('#order-summary-panel').hide();
+        $('#cart-panel').show();
+    });
+
+    // Switch to Place Order Panel
+    $(document).on('click', '#place-order', function () {
+        $('#order-summary-panel').hide();
+        $('#sale-complete-panel').show();
+    });
+
     function renderCartFooterItems() {
         const $footer = $('#cart-footer-items');
         $footer.empty();
@@ -231,7 +308,7 @@ jQuery(document).ready(function ($) {
     $('#customer-search').select2({
         placeholder: 'Search customer...',
         allowClear: true,
-        minimumInputLength: 1, // 🚫 Don't query until 1 character is typed
+        minimumInputLength: 1,
         ajax: {
             url: store_pos.ajax_url,
             method: 'POST',
@@ -313,10 +390,15 @@ jQuery(document).ready(function ($) {
         const id = $(this).data('id');
         const name = $(this).data('name');
         const price = parseFloat($(this).data('price'));
+        const image = $(this).closest('.product-item').find('img').attr('src') || '';
+
         const existing = cart.find(i => i.id === id);
 
-        if (existing) existing.quantity += 1;
-        else cart.push({ id, name, price, quantity: 1 });
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ id, name, price, quantity: 1, image });
+        }
 
         renderCart();
     });

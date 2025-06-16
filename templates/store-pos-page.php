@@ -18,41 +18,61 @@
 
     <!-- Right Panel -->
     <div class="pos-right">
-        <div class="cart-box">
-            <div class="cart-header">
-                <select id="customer-search" style="width: 100%;" data-placeholder="Search customer..."></select>
-                <button id="add-customer-btn">+</button>
-            </div>
 
-            <div class="cart-body">
-                <table class="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Qty</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cart-items">
-                        <tr>
-                            <td colspan="3" class="cart-empty">Empty Cart</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- Cart Panel -->
+        <div id="cart-panel">
+            <div class="cart-box">
+                <div class="cart-header">
+                    <select id="customer-search" style="width: 100%;" data-placeholder="Search customer..."></select>
+                    <button id="add-customer-btn">+</button>
+                </div>
 
-            <div class="cart-footer-items" id="cart-footer-items"></div>
+                <div class="cart-body">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-items">
+                            <tr>
+                                <td colspan="3" class="cart-empty">Empty Cart</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="cart-footer-actions">
-                <button id="discount-btn" class="action-btn">Add Discount</button>
-                <button id="shipping-btn" class="action-btn">Shipping Fee</button>
-                <button id="note-btn" class="action-btn">Add Note</button>
-            </div>
+                <div class="cart-footer-items" id="cart-footer-items"></div>
 
-            <div class="pay-btn-wrapper">
-                <button class="pay-btn">Pay Now <span>৳ 0.00</span></button>
+                <div class="cart-footer-actions">
+                    <button id="discount-btn" class="action-btn">Add Discount</button>
+                    <button id="shipping-btn" class="action-btn">Shipping Fee</button>
+                    <button id="note-btn" class="action-btn">Add Note</button>
+                </div>
+
+                <div class="pay-btn-wrapper">
+                    <button class="pay-btn">Pay Now <span>৳ 0.00</span></button>
+                </div>
             </div>
         </div>
+
+        <!-- Order Summary Panel (hidden initially) -->
+        <div id="order-summary-panel" style="display: none;"></div>
+
+        <!-- Sale Complete Panel (hidden initially) -->
+        <div id="sale-complete-panel" style="display: none;">
+            <div class="sale-complete-content" style="text-align: center; padding: 40px;">
+                <div class="checkmark-icon" style="font-size: 48px; color: #10b981; margin-bottom: 20px;">✅</div>
+                <h2 style="margin-bottom: 20px;">Sale Completed</h2>
+                <div class="sale-complete-actions" style="display: flex; justify-content: center; gap: 16px;">
+                    <button id="print-receipt" class="btn purple">🖨 Print Receipt</button>
+                    <button id="new-sale" class="btn orange">+ New Sale</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Discount Modal -->

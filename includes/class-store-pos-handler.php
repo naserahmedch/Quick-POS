@@ -1,19 +1,22 @@
 <?php
 
-class Store_POS_Handler {
+class Store_POS_Handler
+{
 
     private static $instance = null;
 
-    public static function get_instance() {
+    public static function get_instance()
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
 
-    public static function register_ajax_hooks() {
+    public static function register_ajax_hooks()
+    {
         $instance = self::get_instance();
-    
+
         add_action('wp_ajax_store_pos_search_customers', [$instance, 'search_customers']);
         add_action('wp_ajax_store_pos_fetch_products', [$instance, 'fetch_products']);
         add_action('wp_ajax_store_pos_get_categories', [$instance, 'get_categories']);
@@ -21,7 +24,8 @@ class Store_POS_Handler {
         add_action('wp_ajax_store_pos_get_shipping_methods', [$instance, 'get_shipping_methods']);
     }
 
-    public function fetch_products() {
+    public function fetch_products()
+    {
         $args = [
             'post_type'      => 'product',
             'posts_per_page' => -1,
@@ -46,16 +50,18 @@ class Store_POS_Handler {
         wp_send_json_success($data);
     }
 
-    public function get_categories() {
+    public function get_categories()
+    {
         $terms = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false]);
-        $data = array_map(function($term) {
+        $data = array_map(function ($term) {
             return ['id' => $term->term_id, 'name' => $term->name];
         }, $terms);
 
         wp_send_json_success($data);
     }
 
-    public function add_customer() {
+    public function add_customer()
+    {
         parse_str($_POST['data'], $form_data);
 
         $email = sanitize_email($form_data['email']);
@@ -89,50 +95,71 @@ class Store_POS_Handler {
         wp_send_json_success(['message' => 'Customer has been successfully added']);
     }
 
-    public function search_customers() {
+    public function search_customers()
+    {
         $search_term = isset($_POST['term']) ? sanitize_text_field($_POST['term']) : '';
-    
+
         $args = [
             'role__in' => ['customer'],
             'number'   => 20,
             'search'   => '*' . esc_attr($search_term) . '*',
             'search_columns' => ['user_login', 'user_nicename', 'user_email'],
         ];
-    
+
         $user_query = new WP_User_Query($args);
         $results = [];
-    
+
         foreach ($user_query->get_results() as $user) {
             $user_id     = $user->ID;
             $first_name  = get_user_meta($user_id, 'billing_first_name', true);
             $last_name   = get_user_meta($user_id, 'billing_last_name', true);
             $phone       = get_user_meta($user_id, 'billing_phone', true);
-    
+            $address     = get_user_meta($user_id, 'billing_address_1', true);
+
             // Fallback to display_name if billing name is missing
             $name = trim($first_name . ' ' . $last_name);
             if (empty($name)) {
                 $name = $user->display_name ?: '(No Name)';
             }
-    
+
             if (empty($phone)) {
                 $phone = 'N/A';
             }
-    
+
+            if (empty($address)) {
+                $address = '—';
+            }
+
             $results[] = [
-                'id'   => $user_id,
-                'text' => $name . ' - ' . $phone,
+                'id'      => $user_id,
+                'text'    => $name,
+                'phone'   => $phone,
+                'address' => $address,
             ];
         }
-    
+
         wp_send_json(['results' => $results]);
     }
 
-    public function get_shipping_methods() {
-    $zones = WC_Shipping_Zones::get_zones();
-    $available_methods = [];
+    public function get_shipping_methods()
+    {
+        $zones = WC_Shipping_Zones::get_zones();
+        $available_methods = [];
 
-    foreach ($zones as $zone) {
-        foreach ($zone['shipping_methods'] as $method) {
+        foreach ($zones as $zone) {
+            foreach ($zone['shipping_methods'] as $method) {
+                if ($method->enabled === 'yes') {
+                    $available_methods[] = [
+                        'title' => $method->get_title(),
+                        'cost'  => isset($method->cost) ? $method->cost : 0
+                    ];
+                }
+            }
+        }
+
+        // Also include methods from the "Rest of the World" zone
+        $default_zone = new WC_Shipping_Zone(0);
+        foreach ($default_zone->get_shipping_methods() as $method) {
             if ($method->enabled === 'yes') {
                 $available_methods[] = [
                     'title' => $method->get_title(),
@@ -140,21 +167,7 @@ class Store_POS_Handler {
                 ];
             }
         }
-    }
 
-    // Also include methods from the "Rest of the World" zone
-    $default_zone = new WC_Shipping_Zone(0);
-    foreach ($default_zone->get_shipping_methods() as $method) {
-        if ($method->enabled === 'yes') {
-            $available_methods[] = [
-                'title' => $method->get_title(),
-                'cost'  => isset($method->cost) ? $method->cost : 0
-            ];
-        }
+        wp_send_json_success($available_methods);
     }
-
-    wp_send_json_success($available_methods);
-}
-                       
-    
 }
