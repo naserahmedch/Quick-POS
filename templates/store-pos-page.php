@@ -63,12 +63,16 @@
 
         <!-- Sale Complete Panel (hidden initially) -->
         <div id="sale-complete-panel" style="display: none;">
-            <div class="sale-complete-content" style="text-align: center; padding: 40px;">
-                <div class="checkmark-icon" style="font-size: 48px; color: #10b981; margin-bottom: 20px;">✅</div>
-                <h2 style="margin-bottom: 20px;">Sale Completed</h2>
-                <div class="sale-complete-actions" style="display: flex; justify-content: center; gap: 16px;">
-                    <button id="print-receipt" class="btn purple">🖨 Print Receipt</button>
-                    <button id="new-sale" class="btn orange">+ New Sale</button>
+            <div class="sale-complete-content">
+                <img src="<?php echo plugin_dir_url(__DIR__); ?>assets/img/sale-completed.png" alt="Success" class="complete-icon" />
+                <h2 class="complete-title">Sale Completed</h2>
+                <div class="sale-complete-actions">
+                    <button id="print-receipt" class="btn purple">
+                        🖨 Print Receipt
+                    </button>
+                    <button id="new-sale" class="btn orange">
+                        + New Sale
+                    </button>
                 </div>
             </div>
         </div>

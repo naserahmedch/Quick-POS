@@ -131,6 +131,40 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '#place-order', function () {
         $('#order-summary-panel').hide();
         $('#sale-complete-panel').show();
+
+        const selectedCustomer = $('#customer-search').select2('data')[0] || {};
+
+        const orderPayload = {
+            items: cart.map(item => ({
+                id: item.id,
+                quantity: item.quantity
+            })),
+            shipping: shippingItem?.value || 0,
+            discount: discountItem?.value || 0,
+            note: noteItem?.text || '',
+            first_name: selectedCustomer.text || 'Guest',
+            phone: selectedCustomer.phone || '',
+            address: selectedCustomer.address || '',
+            email: selectedCustomer.email || ''
+        };
+
+        $.post({
+            url: ajaxurl,
+            method: 'POST',
+            data: {
+                action: 'store_pos_create_order',
+                ...orderPayload
+            },
+            success: function (response) {
+                if (response.success) {
+                    console.log('Order placed:', response.data.order_id);
+                    $('#order-summary-panel').hide();
+                    $('#sale-complete-panel').show();
+                } else {
+                    alert('Failed to create order');
+                }
+            }
+        });
     });
 
     function renderCartFooterItems() {

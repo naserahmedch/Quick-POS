@@ -22,6 +22,7 @@ class Store_POS_Handler
         add_action('wp_ajax_store_pos_get_categories', [$instance, 'get_categories']);
         add_action('wp_ajax_store_pos_add_customer', [$instance, 'add_customer']);
         add_action('wp_ajax_store_pos_get_shipping_methods', [$instance, 'get_shipping_methods']);
+        add_action('wp_ajax_store_pos_create_order', [$instance, 'store_pos_create_order']);
     }
 
     public function fetch_products()
@@ -115,6 +116,7 @@ class Store_POS_Handler
             $last_name   = get_user_meta($user_id, 'billing_last_name', true);
             $phone       = get_user_meta($user_id, 'billing_phone', true);
             $address     = get_user_meta($user_id, 'billing_address_1', true);
+            $email       = get_user_meta($user_id, 'billing_email', true) ?: '';
 
             // Fallback to display_name if billing name is missing
             $name = trim($first_name . ' ' . $last_name);
@@ -135,6 +137,7 @@ class Store_POS_Handler
                 'text'    => $name,
                 'phone'   => $phone,
                 'address' => $address,
+                'email'   => $email,
             ];
         }
 
@@ -169,5 +172,60 @@ class Store_POS_Handler
         }
 
         wp_send_json_success($available_methods);
+    }
+
+    function store_pos_create_order()
+    {
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $data = $_POST;
+
+        $order = wc_create_order();
+
+        foreach ($data['items'] as $item) {
+            $order->add_product(wc_get_product($item['id']), $item['quantity']);
+        }
+
+        if (!empty($data['shipping'])) {
+            $order->set_shipping_total(floatval($data['shipping']));
+        }
+
+        if (!empty($data['discount'])) {
+            $item = new WC_Order_Item_Fee();
+            $item->set_name('Discount');
+            $item->set_amount(-1 * floatval($data['discount']));
+            $item->set_total(-1 * floatval($data['discount']));
+            $order->add_item($item);
+        }
+
+        $order->set_address([
+            'first_name' => sanitize_text_field($_POST['first_name']),
+            'phone'      => sanitize_text_field($_POST['phone']),
+            'address_1'  => sanitize_text_field($_POST['address']),
+            'email' => sanitize_email($_POST['email']),
+        ], 'billing');
+
+        if (!empty($data['note'])) {
+            $sanitized_note = sanitize_text_field($data['note']);
+            $order->set_customer_note(sanitize_text_field($data['note']));
+            $order->update_meta_data('_shipping_note', $sanitized_note);
+        }
+
+        if (!empty($_POST['discount'])) {
+            $order->set_discount_total(floatval($_POST['discount']));
+        }
+
+        $shipping = new WC_Order_Item_Shipping();
+        $shipping->set_method_title('Inside Dhaka'); // or dynamic name
+        $shipping->set_method_id('flat_rate');
+        $shipping->set_total(floatval($data['shipping']));
+        $order->add_item($shipping);
+
+        $order->calculate_totals();
+        $order->save();
+
+        wp_send_json_success(['order_id' => $order->get_id()]);
     }
 }
