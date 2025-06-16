@@ -106,29 +106,36 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    $(document).on('dblclick', '.footer-item', function () {
-        const type = $(this).data('type');
-        const $el = $(this);
+    $(document).on('click', '.edit-line', function (e) {
+        e.stopPropagation();
+        const $el = $(this).closest('.footer-item');
+        const type = $el.data('type');
         let html = '';
 
         if (type === 'discount' || type === 'shipping') {
             const val = type === 'discount' ? discountItem?.value : shippingItem?.value;
             html = `
                 <div class="footer-item edit-mode" data-type="${type}">
+                    <span class="footer-label">${type === 'discount' ? 'Discount' : 'Shipping Fee'}</span>
                     <input type="number" class="edit-input" value="${val}" />
-                    <button class="apply-edit">Apply</button>
-                    <button class="cancel-edit">Cancel</button>
+                    <div class="edit-actions">
+                    <button class="apply-edit">✔</button>
+                    <button class="cancel-edit">×</button>
+                    </div>
                 </div>
-            `;
+                `;
         } else if (type === 'note') {
             const val = noteItem?.text;
             html = `
-                <div class="footer-item edit-mode" data-type="note">
+                <div class="footer-item edit-mode footer-item-note" data-type="note">
+                    <span class="footer-label">Note:</span>
                     <input type="text" class="edit-input" value="${val}" />
-                    <button class="apply-edit">Apply</button>
-                    <button class="cancel-edit">Cancel</button>
+                    <div class="edit-actions">
+                    <button class="apply-edit">✔</button>
+                    <button class="cancel-edit">×</button>
+                    </div>
                 </div>
-            `;
+                `;
         }
 
         $el.replaceWith(html);
