@@ -4,7 +4,7 @@
  * Plugin Name: WooCommerce Order Receipt Print
  * Description: Adds a print button on WooCommerce Orders page to print PDF receipts and manage POS.
  * Version: 1.0.0
- * Author: Naser Ahmed
+ * Author: Naser
  * Text Domain: woocommerce-order-receipt-print
  */
 
