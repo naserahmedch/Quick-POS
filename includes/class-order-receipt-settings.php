@@ -1,88 +1,242 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (! defined('ABSPATH')) exit;
 
-class Order_Receipt_Settings {
-
-    public function __construct() {
-        add_action( 'admin_init', array( $this, 'register_settings' ) );
+class Order_Receipt_Settings
+{
+    public function __construct()
+    {
+        add_action('admin_init', [$this, 'register_settings']);
     }
 
-    /**
-     * Render settings page HTML
-     */
-    public function render_settings_page() {
-        ?>
+    public function register_settings()
+    {
+        // Shop Name settings
+        register_setting('worp_settings_group', 'worp_shop_name');
+        register_setting('worp_settings_group', 'worp_shop_name_size');
+        register_setting('worp_settings_group', 'worp_shop_name_weight');
+        register_setting('worp_settings_group', 'worp_shop_name_visible');
+
+        // Customer Name settings
+        register_setting('worp_settings_group', 'worp_customer_name_size');
+        register_setting('worp_settings_group', 'worp_customer_name_weight');
+        register_setting('worp_settings_group', 'worp_customer_name_visible');
+
+        // Address settings
+        register_setting('worp_settings_group', 'worp_address_size');
+        register_setting('worp_settings_group', 'worp_address_weight');
+        register_setting('worp_settings_group', 'worp_address_visible');
+
+        // Phone settings
+        register_setting('worp_settings_group', 'worp_phone_size');
+        register_setting('worp_settings_group', 'worp_phone_weight');
+        register_setting('worp_settings_group', 'worp_phone_visible');
+
+        // Note settings
+        register_setting('worp_settings_group', 'worp_note_size');
+        register_setting('worp_settings_group', 'worp_note_weight');
+        register_setting('worp_settings_group', 'worp_note_visible');
+    }
+
+    public function render_settings_page()
+    {
+?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Receipt Print Settings', 'woocommerce-order-receipt-print' ); ?></h1>
+            <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">Receipt Appearance Settings</h1>
+
             <form method="post" action="options.php">
-                <?php
-                    settings_fields( 'worp_settings_group' );
-                    do_settings_sections( 'worp_settings' );
-                    submit_button();
-                ?>
+                <?php settings_fields('worp_settings_group'); ?>
+
+                <!-- SHOP NAME -->
+                <div class="worp-section">
+                    <div class="worp-section-title">Shop Name</div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_shop_name">Shop Name</label>
+                            <input type="text" id="worp_shop_name" name="worp_shop_name"
+                                value="<?php echo esc_attr(get_option('worp_shop_name', '')); ?>" />
+                        </div>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_shop_name_size">Shop Name Font Size</label>
+                            <input type="number" id="worp_shop_name_size" name="worp_shop_name_size"
+                                value="<?php echo esc_attr(get_option('worp_shop_name_size', '16')); ?>" min="8" max="48" />
+                            <span>px</span>
+                        </div>
+                        <p class="description">Recommended size: 12–20 px</p>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_shop_name_weight">Shop Name Font Weight</label>
+                            <select id="worp_shop_name_weight" name="worp_shop_name_weight">
+                                <option value="normal" <?php selected(get_option('worp_shop_name_weight'), 'normal'); ?>>Normal</option>
+                                <option value="bold" <?php selected(get_option('worp_shop_name_weight'), 'bold'); ?>>Bold</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_shop_name_visible">Show Shop Name on Receipt</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="worp_shop_name_visible" name="worp_shop_name_visible" value="1"
+                                    <?php checked(get_option('worp_shop_name_visible', true), true); ?> />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CUSTOMER -->
+                <div class="worp-section">
+                    <div class="worp-section-title">Customer Name</div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_customer_name_size">Font Size</label>
+                            <input type="number" id="worp_customer_name_size" name="worp_customer_name_size"
+                                value="<?php echo esc_attr(get_option('worp_customer_name_size', '14')); ?>" min="8" max="48" />
+                            <span>px</span>
+                        </div>
+                        <p class="description">Recommended size: 12–20 px</p>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_customer_name_weight">Font Weight</label>
+                            <select id="worp_customer_name_weight" name="worp_customer_name_weight">
+                                <option value="normal" <?php selected(get_option('worp_customer_name_weight'), 'normal'); ?>>Normal</option>
+                                <option value="bold" <?php selected(get_option('worp_customer_name_weight'), 'bold'); ?>>Bold</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_customer_name_visible">Show on Receipt</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="worp_customer_name_visible" name="worp_customer_name_visible" value="1"
+                                    <?php checked(get_option('worp_customer_name_visible', true), true); ?> />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="worp-section">
+                    <div class="worp-section-title">Address</div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_address_size">Font Size</label>
+                            <input type="number" id="worp_address_size" name="worp_address_size"
+                                value="<?php echo esc_attr(get_option('worp_address_size', '14')); ?>" min="8" max="48" />
+                            <span>px</span>
+                        </div>
+                        <p class="description">Recommended size: 12–20 px</p>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_address_weight">Font Weight</label>
+                            <select id="worp_address_weight" name="worp_address_weight">
+                                <option value="normal" <?php selected(get_option('worp_address_weight'), 'normal'); ?>>Normal</option>
+                                <option value="bold" <?php selected(get_option('worp_address_weight'), 'bold'); ?>>Bold</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_address_visible">Show on Receipt</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="worp_address_visible" name="worp_address_visible" value="1"
+                                    <?php checked(get_option('worp_address_visible', true), true); ?> />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PHONE -->
+                <div class="worp-section">
+                    <div class="worp-section-title">Phone</div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_phone_size">Font Size</label>
+                            <input type="number" id="worp_phone_size" name="worp_phone_size"
+                                value="<?php echo esc_attr(get_option('worp_phone_size', '14')); ?>" min="8" max="48" />
+                            <span>px</span>
+                        </div>
+                        <p class="description">Recommended size: 12–20 px</p>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_phone_weight">Font Weight</label>
+                            <select id="worp_phone_weight" name="worp_phone_weight">
+                                <option value="normal" <?php selected(get_option('worp_phone_weight'), 'normal'); ?>>Normal</option>
+                                <option value="bold" <?php selected(get_option('worp_phone_weight'), 'bold'); ?>>Bold</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_phone_visible">Show on Receipt</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="worp_phone_visible" name="worp_phone_visible" value="1"
+                                    <?php checked(get_option('worp_phone_visible', true), true); ?> />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOTE -->
+                <div class="worp-section">
+                    <div class="worp-section-title">Note</div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_note_size">Font Size</label>
+                            <input type="number" id="worp_note_size" name="worp_note_size"
+                                value="<?php echo esc_attr(get_option('worp_note_size', '14')); ?>" min="8" max="48" />
+                            <span>px</span>
+                        </div>
+                        <p class="description">Recommended size: 12–20 px</p>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_note_weight">Font Weight</label>
+                            <select id="worp_note_weight" name="worp_note_weight">
+                                <option value="normal" <?php selected(get_option('worp_note_weight'), 'normal'); ?>>Normal</option>
+                                <option value="bold" <?php selected(get_option('worp_note_weight'), 'bold'); ?>>Bold</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="worp-field">
+                        <div class="worp-inline-group">
+                            <label for="worp_note_visible">Show on Receipt</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="worp_note_visible" name="worp_note_visible" value="1"
+                                    <?php checked(get_option('worp_note_visible', true), true); ?> />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <?php submit_button('Save Settings'); ?>
             </form>
         </div>
-        <?php
-    }
-
-    /**
-     * Register plugin settings, sections, and fields
-     */
-    public function register_settings() {
-        register_setting( 'worp_settings_group', 'worp_settings' );
-
-        add_settings_section(
-            'worp_main_section',
-            __( 'Main Settings', 'woocommerce-order-receipt-print' ),
-            null,
-            'worp_settings'
-        );
-
-        add_settings_field(
-            'shop_name',
-            __( 'Shop Name', 'woocommerce-order-receipt-print' ),
-            array( $this, 'shop_name_field' ),
-            'worp_settings',
-            'worp_main_section'
-        );
-
-        add_settings_field(
-            'font_size',
-            __( 'Phone Font Size', 'woocommerce-order-receipt-print' ),
-            array( $this, 'font_size_field' ),
-            'worp_settings',
-            'worp_main_section'
-        );
-
-        add_settings_field(
-            'phone_weight',
-            __( 'Phone Font Weight', 'woocommerce-order-receipt-print' ),
-            array( $this, 'phone_weight_field' ),
-            'worp_settings',
-            'worp_main_section'
-        );
-    }
-
-    /**
-     * Individual Field Renderers
-     */
-    public function shop_name_field() {
-        $options = get_option( 'worp_settings' );
-        echo '<input type="text" name="worp_settings[shop_name]" value="' . esc_attr( $options['shop_name'] ?? '' ) . '" />';
-    }
-
-    public function font_size_field() {
-        $options = get_option( 'worp_settings' );
-        echo '<input type="number" name="worp_settings[font_size]" value="' . esc_attr( $options['font_size'] ?? 12 ) . '" />';
-    }
-
-    public function phone_weight_field() {
-        $options = get_option( 'worp_settings' );
-        ?>
-        <select name="worp_settings[phone_weight]">
-            <option value="normal" <?php selected( $options['phone_weight'] ?? '', 'normal' ); ?>>Normal</option>
-            <option value="bold" <?php selected( $options['phone_weight'] ?? '', 'bold' ); ?>>Bold</option>
-        </select>
-        <?php
+<?php
     }
 }

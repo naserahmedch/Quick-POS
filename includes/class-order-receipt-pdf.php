@@ -149,7 +149,18 @@ class Order_Receipt_PDF
 
         <div style="max-width:226.77pt; padding:8mm 5mm; box-sizing:border-box;">
             <div class="receipt-header">
-                <h2><?php echo esc_html(get_bloginfo('name')); ?></h2>
+                <?php
+                $shop_visible = get_option('worp_shop_name_visible', true);
+                $shop_name    = esc_html(get_option('worp_shop_name', get_bloginfo('name')));
+                $shop_size    = esc_attr(get_option('worp_shop_name_size', '16'));
+                $shop_weight  = esc_attr(get_option('worp_shop_name_weight', 'bold'));
+
+                if ($shop_visible && $shop_name !== '') :
+                ?>
+                    <h2 style="margin: 0; font-size: <?php echo $shop_size; ?>px; font-weight: <?php echo $shop_weight; ?>;">
+                        <?php echo $shop_name; ?>
+                    </h2>
+                <?php endif; ?>
             </div>
 
             <div class="receipt-details">
@@ -157,9 +168,43 @@ class Order_Receipt_PDF
                     <span>Order: #<?php echo $order->get_id(); ?></span>
                     <span class="cod"><?php echo $order->get_payment_method_title(); ?></span>
                 </div>
-                <p>Customer: <?php echo $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(); ?></p>
-                <p>Address: <?php echo $order->get_billing_address_1() . ', ' . $order->get_billing_city(); ?></p>
-                <p class="bold-phone">Phone: <?php echo $order->get_billing_phone(); ?></p>
+                <?php
+                $customer_visible = get_option('worp_customer_name_visible', true);
+                $customer_size    = esc_attr(get_option('worp_customer_name_size', '14'));
+                $customer_weight  = esc_attr(get_option('worp_customer_name_weight', 'normal'));
+
+                $address_visible  = get_option('worp_address_visible', true);
+                $address_size     = esc_attr(get_option('worp_address_size', '14'));
+                $address_weight   = esc_attr(get_option('worp_address_weight', 'normal'));
+
+                $phone_visible    = get_option('worp_phone_visible', true);
+                $phone_size       = esc_attr(get_option('worp_phone_size', '14'));
+                $phone_weight     = esc_attr(get_option('worp_phone_weight', 'normal'));
+
+                $billing_name     = esc_html($order->get_billing_first_name());
+                $billing_phone    = esc_html($order->get_billing_phone());
+                $billing_address  = esc_html($order->get_billing_address_1());
+                ?>
+
+                <div class="receipt-customer-details" style="margin-top: 10px;">
+                    <?php if ($customer_visible && $billing_name): ?>
+                        <div style="font-size: <?php echo $customer_size; ?>px; font-weight: <?php echo $customer_weight; ?>;">
+                            Customer: <?php echo $billing_name; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($address_visible && $billing_address): ?>
+                        <div style="font-size: <?php echo $address_size; ?>px; font-weight: <?php echo $address_weight; ?>;">
+                            Address: <?php echo $billing_address; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($phone_visible && $billing_phone): ?>
+                        <div style="font-size: <?php echo $phone_size; ?>px; font-weight: <?php echo $phone_weight; ?>;">
+                            Phone: <?php echo $billing_phone; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <table class="productTable">
@@ -215,12 +260,25 @@ class Order_Receipt_PDF
                         <td style="text-align: right;"><?php echo number_format($order->get_total(), 2) . ' Tk'; ?></td>
                     </tr>
 
+                    <!-- This is a valid HTML comment -->
                     <?php
-                    $note = trim($order->get_customer_note());
-                    if (!empty($note)) : ?>
+                    $note_visible = get_option('worp_note_visible', true);
+                    $note_content = trim($order->get_customer_note());
+
+                    if ($note_visible && !empty($note_content)) :
+                        $note_size = esc_attr(get_option('worp_note_size', '14'));
+                        $note_weight = esc_attr(get_option('worp_note_weight', 'normal'));
+                    ?>
                         <tr class="noteRow">
                             <td colspan="2" style="padding-top: 10px;">
-                                <em><strong>Note:</strong> <?php echo esc_html($note); ?></em>
+                                <em>
+                                    <strong style="font-size: <?php echo $note_size; ?>px; font-weight: <?php echo $note_weight; ?>;">
+                                        Note:
+                                    </strong>
+                                    <span style="font-size: <?php echo $note_size; ?>px; font-weight: <?php echo $note_weight; ?>;">
+                                        <?php echo esc_html($note_content); ?>
+                                    </span>
+                                </em>
                             </td>
                         </tr>
                     <?php endif; ?>

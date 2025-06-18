@@ -51,27 +51,35 @@ function worp_init_plugin()
     }
 }
 
-// Register Admin Menu
+function worp_redirect_to_settings()
+{
+    wp_safe_redirect(admin_url('admin.php?page=worp_settings'));
+    exit;
+}
+
 add_action('admin_menu', function () {
+    // Top-level menu: Order Receipt (redirects to Settings)
     add_menu_page(
-        'Order Receipt Print',
-        'Order Receipt',
-        'manage_woocommerce',
-        'worp-dashboard',
-        '__return_null',
-        'dashicons-media-document',
-        56
+        'Order Receipt Print',                               // Page title
+        'Order Receipt',                                     // Menu title
+        'manage_woocommerce',                                // Capability
+        'worp-dashboard',                                    // Menu slug
+        'worp_redirect_to_settings',                         // Callback: redirect to Settings
+        'dashicons-media-document',                          // Icon
+        56                                                   // Position
     );
 
+    // Submenu: Settings
     add_submenu_page(
-        'worp-dashboard',
-        'Receipt Print Settings',
-        'Settings',
-        'manage_woocommerce',
-        'worp_settings',
+        'worp-dashboard',                                    // Parent slug
+        'Receipt Print Settings',                            // Page title
+        'Settings',                                          // Submenu title
+        'manage_woocommerce',                                // Capability
+        'worp_settings',                                     // Submenu slug
         [new Order_Receipt_Settings(), 'render_settings_page']
     );
 
+    // Submenu: Store POS
     add_submenu_page(
         'worp-dashboard',
         'Store POS',
@@ -80,6 +88,19 @@ add_action('admin_menu', function () {
         'store-pos',
         [new Store_POS(), 'render']
     );
+
+    global $submenu;
+    if (isset($submenu['worp-dashboard'])) {
+        unset($submenu['worp-dashboard'][0]);
+    }
+}, 999);
+
+// Enqueue the CSS File of the Settings Page
+add_action('admin_enqueue_scripts', function ($hook) {
+    // Only load on the Worp Settings page
+    if (isset($_GET['page']) && $_GET['page'] === 'worp_settings') {
+        wp_enqueue_style('worp-settings-css', WORP_PLUGIN_URL . 'assets/css/worp-settings.css', [], '1.0');
+    }
 });
 
 // Enqueue Scripts/Styles Only for Store POS Page
