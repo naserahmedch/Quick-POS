@@ -217,11 +217,13 @@ class Store_POS_Handler
             $order->set_discount_total(floatval($_POST['discount']));
         }
 
+        $order->set_customer_id(intval($_POST['customer_id']));
         $shipping = new WC_Order_Item_Shipping();
         $shipping->set_method_title('Inside Dhaka'); // or dynamic name
         $shipping->set_method_id('flat_rate');
         $shipping->set_total(floatval($data['shipping']));
         $order->add_item($shipping);
+        $order->set_billing_email(sanitize_email($_POST['email']));
 
         $order->calculate_totals();
         $order->save();

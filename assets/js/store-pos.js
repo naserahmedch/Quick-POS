@@ -139,6 +139,7 @@ jQuery(document).ready(function ($) {
                 id: item.id,
                 quantity: item.quantity
             })),
+            customer_id: selectedCustomer.id || 0,
             shipping: shippingItem?.value || 0,
             discount: discountItem?.value || 0,
             note: noteItem?.text || '',
