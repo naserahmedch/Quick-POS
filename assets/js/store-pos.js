@@ -176,6 +176,11 @@ jQuery(document).ready(function ($) {
         discountItem = null;
         shippingItem = null;
         noteItem = null;
+        lastOrderId = null;
+
+        // Clear customer
+        $('#customer-search').val(null).trigger('change');
+        selectedCustomerId = null;
 
         // Re-render
         renderCart();

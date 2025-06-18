@@ -188,6 +188,21 @@ class Order_Receipt_PDF
                         <td style="text-align: right;"><?php echo number_format($order->get_subtotal(), 2) . ' Tk'; ?></td>
                     </tr>
 
+                    <?php
+                    $discount_total = 0;
+                    foreach ($order->get_items('fee') as $item) {
+                        if (strtolower($item->get_name()) === 'discount') {
+                            $discount_total += abs($item->get_total());
+                        }
+                    }
+
+                    if ($discount_total > 0): ?>
+                        <tr class="discountRow">
+                            <td><strong>Discount:</strong></td>
+                            <td style="text-align: right;">- <?php echo number_format($discount_total, 2); ?> Tk</td>
+                        </tr>
+                    <?php endif; ?>
+
                     <?php if ($order->get_shipping_total() > 0) : ?>
                         <tr class="shipping-row">
                             <td><strong>Shipping Fee:</strong></td>
@@ -196,9 +211,19 @@ class Order_Receipt_PDF
                     <?php endif; ?>
 
                     <tr class="total-row">
-                        <td><strong>Total Price (Inc. Shipping Fee):</strong></td>
+                        <td><strong>Total Price:</strong></td>
                         <td style="text-align: right;"><?php echo number_format($order->get_total(), 2) . ' Tk'; ?></td>
                     </tr>
+
+                    <?php
+                    $note = trim($order->get_customer_note());
+                    if (!empty($note)) : ?>
+                        <tr class="noteRow">
+                            <td colspan="2" style="padding-top: 10px;">
+                                <em><strong>Note:</strong> <?php echo esc_html($note); ?></em>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

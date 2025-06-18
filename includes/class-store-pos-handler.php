@@ -188,16 +188,20 @@ class Store_POS_Handler
             $order->add_product(wc_get_product($item['id']), $item['quantity']);
         }
 
-        if (!empty($data['shipping'])) {
-            $order->set_shipping_total(floatval($data['shipping']));
+        $discount = isset($_POST['discount']) ? floatval($_POST['discount']) : 0;
+
+        if ($discount > 0) {
+            $fee = new WC_Order_Item_Fee();
+            $fee->set_name('Discount');
+            $fee->set_amount(-$discount);
+            $fee->set_total(-$discount);
+            $fee->set_tax_class('');
+            $fee->set_taxes([]);
+            $order->add_item($fee);
         }
 
-        if (!empty($data['discount'])) {
-            $item = new WC_Order_Item_Fee();
-            $item->set_name('Discount');
-            $item->set_amount(-1 * floatval($data['discount']));
-            $item->set_total(-1 * floatval($data['discount']));
-            $order->add_item($item);
+        if (!empty($data['shipping'])) {
+            $order->set_shipping_total(floatval($data['shipping']));
         }
 
         $order->set_address([
@@ -211,10 +215,6 @@ class Store_POS_Handler
             $sanitized_note = sanitize_text_field($data['note']);
             $order->set_customer_note(sanitize_text_field($data['note']));
             $order->update_meta_data('_shipping_note', $sanitized_note);
-        }
-
-        if (!empty($_POST['discount'])) {
-            $order->set_discount_total(floatval($_POST['discount']));
         }
 
         $order->set_customer_id(intval($_POST['customer_id']));
