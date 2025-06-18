@@ -3,6 +3,7 @@ jQuery(document).ready(function ($) {
     let discountItem = null;
     let shippingItem = null;
     let noteItem = null;
+    let lastOrderId = null;
 
     function renderCart() {
         const $cartList = $('#cart-items');
@@ -158,13 +159,52 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 if (response.success) {
-                    console.log('Order placed:', response.data.order_id);
+                    lastOrderId = response.data.order_id; // 🔐 Store last order ID
                     $('#order-summary-panel').hide();
                     $('#sale-complete-panel').show();
                 } else {
                     alert('Failed to create order');
                 }
             }
+        });
+    });
+
+    // Clear POS and return to cart
+    $(document).on('click', '#new-sale', function () {
+        // Reset all data
+        cart = [];
+        discountItem = null;
+        shippingItem = null;
+        noteItem = null;
+
+        // Re-render
+        renderCart();
+        updateCartTotal();
+
+        // Show cart, hide other panels
+        $('#sale-complete-panel').hide();
+        $('#order-summary-panel').hide();
+        $('#cart-panel').show();
+    });
+
+    // Sale Complete Panel Print Functionality
+    $(document).on('click', '#print-receipt', function () {
+        if (!lastOrderId) {
+            alert('❌ Order ID not found');
+            return;
+        }
+
+        $.post(store_pos.ajax_url, {
+            action: 'worp_generate_pdf',
+            order_id: lastOrderId
+        }, function (response) {
+            if (response.success && response.data.url) {
+                window.open(response.data.url, '_blank');
+            } else {
+                alert('❌ Error generating PDF: ' + (response.data || 'Unknown error'));
+            }
+        }).fail(function (xhr, status, error) {
+            alert('AJAX Error: ' + error);
         });
     });
 
