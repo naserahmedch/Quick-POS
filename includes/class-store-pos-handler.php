@@ -28,22 +28,23 @@ class Store_POS_Handler
     public function fetch_products()
     {
         $args = [
-            'post_type'      => 'product',
+            'post_type' => 'product',
             'posts_per_page' => -1,
-            'post_status'    => 'publish',
+            'post_status' => 'publish',
         ];
         $products = get_posts($args);
 
         $data = [];
         foreach ($products as $product_post) {
             $product = wc_get_product($product_post->ID);
-            if (!$product || !$product->is_in_stock()) continue;
+            if (!$product || !$product->is_in_stock())
+                continue;
 
             $data[] = [
-                'id'          => $product->get_id(),
-                'name'        => $product->get_name(),
-                'price'       => $product->get_price(),
-                'image'       => wp_get_attachment_image_url($product->get_image_id(), 'woocommerce_thumbnail'),
+                'id' => $product->get_id(),
+                'name' => $product->get_name(),
+                'price' => $product->get_price(),
+                'image' => wp_get_attachment_image_url($product->get_image_id(), 'woocommerce_thumbnail'),
                 'category_id' => $product->get_category_ids()[0] ?? 0,
             ];
         }
@@ -75,11 +76,11 @@ class Store_POS_Handler
 
         $userdata = [
             'user_login' => $username,
-            'user_pass'  => $password,
+            'user_pass' => $password,
             'user_email' => $email,
             'first_name' => sanitize_text_field($form_data['first_name']),
-            'last_name'  => sanitize_text_field($form_data['last_name']),
-            'role'       => 'customer'
+            'last_name' => sanitize_text_field($form_data['last_name']),
+            'role' => 'customer'
         ];
 
         $user_id = wp_insert_user($userdata);
@@ -100,25 +101,64 @@ class Store_POS_Handler
     {
         $search_term = isset($_POST['term']) ? sanitize_text_field($_POST['term']) : '';
 
+        // Step 1: Search by meta fields (phone, billing names, billing email)
         $args = [
             'role__in' => ['customer'],
-            'number'   => 20,
-            'search'   => '*' . esc_attr($search_term) . '*',
-            'search_columns' => ['user_login', 'user_nicename', 'user_email'],
+            'number' => 100,
+            'meta_query' => [
+                'relation' => 'OR',
+                [
+                    'key' => 'billing_phone',
+                    'value' => $search_term,
+                    'compare' => 'LIKE',
+                ],
+                [
+                    'key' => 'billing_first_name',
+                    'value' => $search_term,
+                    'compare' => 'LIKE',
+                ],
+                [
+                    'key' => 'billing_last_name',
+                    'value' => $search_term,
+                    'compare' => 'LIKE',
+                ],
+                [
+                    'key' => 'billing_email',
+                    'value' => $search_term,
+                    'compare' => 'LIKE',
+                ],
+            ],
         ];
 
         $user_query = new WP_User_Query($args);
+        $meta_matches = $user_query->get_results();
+
+        // Step 2: Search by core fields (user_login, display_name, user_email)
+        $core_matches = get_users([
+            'role__in' => ['customer'],
+            'number' => 100,
+            'search' => '*' . esc_attr($search_term) . '*',
+            'search_columns' => ['display_name', 'user_login', 'user_email'],
+        ]);
+
+        // Merge both result sets and remove duplicates by ID
+        $all_matches = array_merge($meta_matches, $core_matches);
+        $unique_users = [];
+        foreach ($all_matches as $user) {
+            $unique_users[$user->ID] = $user; // Keeps only one per ID
+        }
+
+        // Format the response
         $results = [];
 
-        foreach ($user_query->get_results() as $user) {
-            $user_id     = $user->ID;
-            $first_name  = get_user_meta($user_id, 'billing_first_name', true);
-            $last_name   = get_user_meta($user_id, 'billing_last_name', true);
-            $phone       = get_user_meta($user_id, 'billing_phone', true);
-            $address     = get_user_meta($user_id, 'billing_address_1', true);
-            $email       = get_user_meta($user_id, 'billing_email', true) ?: '';
+        foreach ($unique_users as $user) {
+            $user_id = $user->ID;
+            $first_name = get_user_meta($user_id, 'billing_first_name', true);
+            $last_name = get_user_meta($user_id, 'billing_last_name', true);
+            $phone = get_user_meta($user_id, 'billing_phone', true);
+            $address = get_user_meta($user_id, 'billing_address_1', true);
+            $email = get_user_meta($user_id, 'billing_email', true) ?: '';
 
-            // Fallback to display_name if billing name is missing
             $name = trim($first_name . ' ' . $last_name);
             if (empty($name)) {
                 $name = $user->display_name ?: '(No Name)';
@@ -133,11 +173,11 @@ class Store_POS_Handler
             }
 
             $results[] = [
-                'id'      => $user_id,
-                'text'    => $name,
-                'phone'   => $phone,
+                'id' => $user_id,
+                'text' => $name,
+                'phone' => $phone,
                 'address' => $address,
-                'email'   => $email,
+                'email' => $email,
             ];
         }
 
@@ -154,7 +194,7 @@ class Store_POS_Handler
                 if ($method->enabled === 'yes') {
                     $available_methods[] = [
                         'title' => $method->get_title(),
-                        'cost'  => isset($method->cost) ? $method->cost : 0
+                        'cost' => isset($method->cost) ? $method->cost : 0
                     ];
                 }
             }
@@ -166,7 +206,7 @@ class Store_POS_Handler
             if ($method->enabled === 'yes') {
                 $available_methods[] = [
                     'title' => $method->get_title(),
-                    'cost'  => isset($method->cost) ? $method->cost : 0
+                    'cost' => isset($method->cost) ? $method->cost : 0
                 ];
             }
         }
@@ -206,8 +246,8 @@ class Store_POS_Handler
 
         $order->set_address([
             'first_name' => sanitize_text_field($_POST['first_name']),
-            'phone'      => sanitize_text_field($_POST['phone']),
-            'address_1'  => sanitize_text_field($_POST['address']),
+            'phone' => sanitize_text_field($_POST['phone']),
+            'address_1' => sanitize_text_field($_POST['address']),
             'email' => sanitize_email($_POST['email']),
         ], 'billing');
 
