@@ -90,7 +90,13 @@ body {
     width: 35%;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 92vh;
+    max-height: 92vh;
+    overflow-y: auto;
+    z-index: 10;
 }
 
 .cart-box {
@@ -98,7 +104,7 @@ body {
     padding: 16px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    height: 100%;
+    height: 88vh;
     display: flex;
     flex-direction: column;
 }
@@ -772,6 +778,10 @@ body {
     padding: 25px 20px;
     max-width: 480px;
     margin: 0 auto;
+    height: 87vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .summary-header {
@@ -845,6 +855,8 @@ body {
 .summary-totals {
     margin-top: 20px;
     font-size: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
 }
 
 .summary-totals div {
@@ -893,24 +905,18 @@ body {
 
 /* Sale Complete Panel */
 #sale-complete-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    height: 100%;
-    min-height: 100vh;
-}
-
-.sale-complete-content {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 6px 30px rgba(0, 0, 0, 0.06);
     text-align: center;
     padding: 80px 40px;
-    width: 100%;
-    max-width: 460px;
+    width: 85%;
     animation: fadeInUp 0.3s ease-in-out;
-    height: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .sale-complete-content .complete-icon {

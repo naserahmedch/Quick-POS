@@ -94,7 +94,16 @@ class Store_POS_Handler
         update_user_meta($user_id, 'billing_postcode', sanitize_text_field($form_data['postcode'] ?? ''));
         update_user_meta($user_id, 'billing_phone', sanitize_text_field($form_data['phone'] ?? ''));
 
-        wp_send_json_success(['message' => 'Customer has been successfully added']);
+        $name = trim($userdata['first_name'] . ' ' . $userdata['last_name']);
+        if (empty($name)) {
+            $user = get_userdata($user_id);
+            $name = $user->display_name ?: '(No Name)';
+        }
+
+        wp_send_json_success([
+            'id'   => $user_id,
+            'text' => $name
+        ]);
     }
 
     public function search_customers()

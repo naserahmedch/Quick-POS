@@ -79,7 +79,8 @@ jQuery(document).ready(function ($) {
 
         let summaryHTML = `
         <div class="order-summary-box" style="padding: 20px;">
-            <div class="summary-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <div>
+                <div class="summary-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
                 <div>
                     <div><strong>Customer:</strong> ${customerName}</div>
                     <div><strong>Phone:</strong> ${customerPhone}</div>
@@ -89,7 +90,7 @@ jQuery(document).ready(function ($) {
                 <div style="text-align:right;"><strong>Order Summary</strong></div>
             </div>
 
-            <div class="summary-body" style="border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 15px 0;">
+            <div class="summary-body" style="border-top: 1px solid #eee; padding: 15px 0;">
                 ${cart.map(item => `
             <div class="summary-item">
                 <div class="summary-item-left">
@@ -103,8 +104,10 @@ jQuery(document).ready(function ($) {
             </div>
             `).join('')}
             </div>
+            </div>
 
-            <div class="summary-totals" style="margin-top: 20px;">
+            <div>
+                    <div class="summary-totals" style="margin-top: 20px;">
                 <div style="display: flex; justify-content: space-between;"><span>Subtotal</span><span>${subtotal.toFixed(2)} Tk</span></div>
                 ${discountItem ? `<div style="display: flex; justify-content: space-between;"><span>Discount</span><span>- ${discountItem.value} Tk</span></div>` : ''}
                 ${shippingItem ? `<div style="display: flex; justify-content: space-between;"><span>Shipping</span><span>${shippingItem.value} Tk</span></div>` : ''}
@@ -114,6 +117,7 @@ jQuery(document).ready(function ($) {
             <div class="summary-actions" style="margin-top: 25px; display: flex; justify-content: space-between;">
                 <a href="#" id="back-to-cart" class="go-back">← Back to Cart</a>
                 <button id="place-order" class="btn green">Place Order ৳ ${total.toFixed(2)}</button>
+            </div>
             </div>
         </div>
     `;
@@ -525,6 +529,27 @@ jQuery(document).ready(function ($) {
         if (key === 'back') $('#discount-input').val(current.slice(0, -1));
         else if (key === '.' && current.includes('.')) return;
         else $('#discount-input').val(current + key);
+    });
+
+    $(document).on('keydown', function (e) {
+        // Exit if discount modal is not visible
+        if (!$('#discount-modal').is(':visible')) return;
+
+        // Exit if user is typing in an input
+        if ($(e.target).is('input, textarea')) return;
+
+        let key = e.key;
+
+        // Normalize special keys
+        if (key === 'Backspace') key = 'back';
+        if (key === 'Enter') key = 'enter';
+
+        // Match the button by data-key
+        const $button = $('#discount-modal button[data-key="' + key + '"]');
+        if ($button.length) {
+            $button.trigger('click');
+            e.preventDefault();
+        }
     });
 
     $('#apply-fixed-discount').on('click', function () {
